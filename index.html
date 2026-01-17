@@ -23,7 +23,19 @@
             overflow: hidden;
         }
 
+        /* Particle Canvas Background */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
         .app {
+            position: relative;
+            z-index: 10;
             width: 100%;
             max-width: 600px;
             padding: 2rem;
@@ -47,6 +59,8 @@
             border-radius: 50%;
             border: 2px solid #1a1a1a;
             transition: all 0.5s ease;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
         }
 
         .ring-outer.awake {
@@ -77,7 +91,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle, #0a0a0a 0%, #000000 100%);
+            background: radial-gradient(circle, rgba(10,10,10,0.9) 0%, rgba(0,0,0,0.95) 100%);
         }
 
         .status-icon {
@@ -164,13 +178,14 @@
 
         .camera-container {
             position: relative;
-            width: 200px;
-            height: 200px;
+            width: 180px;
+            height: 180px;
             margin: 0 auto;
             border-radius: 12px;
             overflow: hidden;
             display: none;
             border: 1px solid #1a1a1a;
+            background: rgba(0,0,0,0.5);
         }
 
         .camera-container.active {
@@ -234,7 +249,7 @@
             font-family: 'Orbitron', monospace;
             font-size: 0.7rem;
             letter-spacing: 0.3em;
-            color: #333;
+            color: #444;
         }
 
         .live-indicator {
@@ -276,10 +291,11 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle, transparent 30%, rgba(255, 51, 102, 0.1) 100%);
+            background: radial-gradient(circle, transparent 30%, rgba(255, 51, 102, 0.15) 100%);
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.3s;
+            z-index: 5;
         }
 
         .alert-overlay.active {
@@ -300,6 +316,7 @@
             border-color: #1a1a1a;
             border-style: solid;
             transition: border-color 0.3s;
+            z-index: 15;
         }
 
         .corner.tl { top: 20px; left: 20px; border-width: 1px 0 0 1px; }
@@ -312,6 +329,7 @@
     </style>
 </head>
 <body>
+    <canvas id="particleCanvas"></canvas>
     <div class="alert-overlay" id="alertOverlay"></div>
 
     <div class="corner tl" id="corner1"></div>
@@ -352,6 +370,167 @@
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
 
     <script type="text/javascript">
+        // ============== PARTICLE SYSTEM ==============
+        const particleCanvas = document.getElementById('particleCanvas');
+        const pCtx = particleCanvas.getContext('2d');
+        let particles = [];
+        let particleColor = { r: 100, g: 100, b: 100 };
+        let targetColor = { r: 100, g: 100, b: 100 };
+        let mouseX = 0, mouseY = 0;
+        let currentState = 'idle';
+
+        function resizeParticleCanvas() {
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                // Posición en esfera
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 150 + Math.random() * 200;
+                this.x = particleCanvas.width / 2 + Math.cos(angle) * radius;
+                this.y = particleCanvas.height / 2 + Math.sin(angle) * radius;
+                this.z = Math.random() * 200 - 100;
+
+                this.originX = this.x;
+                this.originY = this.y;
+
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.speedZ = (Math.random() - 0.5) * 0.3;
+
+                // Rotación orbital
+                this.angle = angle;
+                this.orbitSpeed = (Math.random() - 0.5) * 0.002;
+                this.orbitRadius = radius;
+
+                this.life = 1;
+                this.decay = Math.random() * 0.003 + 0.001;
+            }
+
+            update() {
+                // Rotación orbital
+                this.angle += this.orbitSpeed;
+
+                // Movimiento base
+                const centerX = particleCanvas.width / 2;
+                const centerY = particleCanvas.height / 2;
+
+                this.x = centerX + Math.cos(this.angle) * this.orbitRadius + this.speedX * 10;
+                this.y = centerY + Math.sin(this.angle) * this.orbitRadius + this.speedY * 10;
+                this.z += this.speedZ;
+
+                // Efecto de profundidad
+                const scale = (200 + this.z) / 400;
+                this.displaySize = this.size * scale;
+
+                // Interacción con mouse
+                const dx = mouseX - this.x;
+                const dy = mouseY - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 100) {
+                    const force = (100 - dist) / 100;
+                    this.x -= dx * force * 0.02;
+                    this.y -= dy * force * 0.02;
+                }
+
+                // Estado sleeping: partículas más caóticas
+                if (currentState === 'sleeping') {
+                    this.orbitSpeed = this.orbitSpeed > 0 ?
+                        Math.min(this.orbitSpeed + 0.0001, 0.01) :
+                        Math.max(this.orbitSpeed - 0.0001, -0.01);
+                    this.speedX += (Math.random() - 0.5) * 0.1;
+                    this.speedY += (Math.random() - 0.5) * 0.1;
+                } else if (currentState === 'awake') {
+                    // Más calmado cuando despierto
+                    this.speedX *= 0.98;
+                    this.speedY *= 0.98;
+                }
+
+                // Reset si sale de pantalla
+                if (this.z > 100 || this.z < -100) {
+                    this.speedZ *= -1;
+                }
+            }
+
+            draw() {
+                const alpha = ((200 + this.z) / 400) * 0.8;
+                pCtx.beginPath();
+                pCtx.arc(this.x, this.y, Math.max(0.1, this.displaySize), 0, Math.PI * 2);
+                pCtx.fillStyle = `rgba(${Math.floor(particleColor.r)}, ${Math.floor(particleColor.g)}, ${Math.floor(particleColor.b)}, ${alpha})`;
+                pCtx.fill();
+            }
+        }
+
+        function initParticles() {
+            resizeParticleCanvas();
+            particles = [];
+            for (let i = 0; i < 800; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function lerpColor() {
+            particleColor.r += (targetColor.r - particleColor.r) * 0.02;
+            particleColor.g += (targetColor.g - particleColor.g) * 0.02;
+            particleColor.b += (targetColor.b - particleColor.b) * 0.02;
+        }
+
+        function animateParticles() {
+            pCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            pCtx.fillRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+            lerpColor();
+
+            // Dibujar conexiones
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 50) {
+                        const alpha = (1 - dist / 50) * 0.15;
+                        pCtx.beginPath();
+                        pCtx.moveTo(particles[i].x, particles[i].y);
+                        pCtx.lineTo(particles[j].x, particles[j].y);
+                        pCtx.strokeStyle = `rgba(${Math.floor(particleColor.r)}, ${Math.floor(particleColor.g)}, ${Math.floor(particleColor.b)}, ${alpha})`;
+                        pCtx.stroke();
+                    }
+                }
+            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animateParticles);
+        }
+
+        // Mouse tracking
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        window.addEventListener('resize', () => {
+            resizeParticleCanvas();
+            initParticles();
+        });
+
+        // Start particle system
+        initParticles();
+        animateParticles();
+
+        // ============== POSTURE DETECTION ==============
         const URL = "https://teachablemachine.withgoogle.com/models/tlpoKJm_L/";
         let model, webcam, ctx, maxPredictions;
         let lastState = null;
@@ -361,49 +540,25 @@
         // Síntesis de voz
         function speak(text) {
             if ('speechSynthesis' in window) {
-                // Cancelar cualquier voz anterior
                 speechSynthesis.cancel();
-
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'es-ES';
                 utterance.rate = 0.9;
                 utterance.pitch = 1;
                 utterance.volume = 1;
-
-                // Buscar voz en español
                 const voices = speechSynthesis.getVoices();
                 const spanishVoice = voices.find(v => v.lang.includes('es'));
-                if (spanishVoice) {
-                    utterance.voice = spanishVoice;
-                }
-
+                if (spanishVoice) utterance.voice = spanishVoice;
                 speechSynthesis.speak(utterance);
             }
         }
 
-        // Cargar voces
         if ('speechSynthesis' in window) {
             speechSynthesis.getVoices();
             speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
         }
 
-        function playAlertSound() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            oscillator.frequency.value = 880;
-            oscillator.type = 'sine';
-            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.2);
-        }
-
+        // Solo alerta de sonido para dormido
         function playSleepingAlert() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -433,6 +588,17 @@
             });
         }
 
+        function setParticleState(state) {
+            currentState = state;
+            if (state === 'awake') {
+                targetColor = { r: 0, g: 255, b: 136 };
+            } else if (state === 'sleeping') {
+                targetColor = { r: 255, g: 51, b: 102 };
+            } else {
+                targetColor = { r: 100, g: 100, b: 100 };
+            }
+        }
+
         async function init() {
             const startBtn = document.getElementById('startBtn');
             startBtn.disabled = true;
@@ -445,7 +611,7 @@
                 model = await tmPose.load(modelURL, metadataURL);
                 maxPredictions = model.getTotalClasses();
 
-                const size = 200;
+                const size = 180;
                 const flip = true;
                 webcam = new tmPose.Webcam(size, size, flip);
                 await webcam.setup();
@@ -516,9 +682,9 @@
                 scanLine.className = 'scan-line';
                 alertOverlay.classList.remove('active');
                 setCorners('awake');
+                setParticleState('awake');
 
                 if (lastState !== 'awake') {
-                    playAlertSound();
                     speak('Estás despierto');
                     lastState = 'awake';
                     if (sleepAlertInterval) {
@@ -535,12 +701,12 @@
                 scanLine.className = 'scan-line sleeping';
                 alertOverlay.classList.add('active');
                 setCorners('sleeping');
+                setParticleState('sleeping');
 
                 if (lastState !== 'sleeping') {
                     playSleepingAlert();
                     speak('Alerta. Estás dormido. Despierta.');
                     lastState = 'sleeping';
-                    // Repetir alerta de voz cada 5 segundos si sigue dormido
                     sleepAlertInterval = setInterval(() => {
                         playSleepingAlert();
                         speak('Despierta');
@@ -555,6 +721,7 @@
                 scanLine.className = 'scan-line';
                 alertOverlay.classList.remove('active');
                 setCorners(null);
+                setParticleState('idle');
             }
 
             drawPose(pose);
