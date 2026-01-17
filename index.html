@@ -23,7 +23,6 @@
             overflow: hidden;
         }
 
-        /* Particle Canvas Background */
         #particleCanvas {
             position: fixed;
             top: 0;
@@ -42,11 +41,10 @@
             text-align: center;
         }
 
-        /* Main Status Circle */
         .status-ring {
             position: relative;
-            width: 280px;
-            height: 280px;
+            width: 300px;
+            height: 300px;
             margin: 0 auto 2rem;
         }
 
@@ -59,66 +57,82 @@
             border-radius: 50%;
             border: 2px solid #1a1a1a;
             transition: all 0.5s ease;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
         }
 
         .ring-outer.awake {
             border-color: #00ff88;
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.3), inset 0 0 40px rgba(0, 255, 136, 0.1);
+            box-shadow:
+                0 0 60px rgba(0, 255, 136, 0.4),
+                0 0 120px rgba(0, 255, 136, 0.2),
+                inset 0 0 60px rgba(0, 255, 136, 0.1);
         }
 
         .ring-outer.sleeping {
             border-color: #ff3366;
-            box-shadow: 0 0 40px rgba(255, 51, 102, 0.4), inset 0 0 40px rgba(255, 51, 102, 0.1);
-            animation: dangerPulse 1.5s infinite;
+            box-shadow:
+                0 0 60px rgba(255, 51, 102, 0.5),
+                0 0 120px rgba(255, 51, 102, 0.3),
+                inset 0 0 60px rgba(255, 51, 102, 0.15);
+            animation: dangerPulse 1s infinite;
         }
 
         @keyframes dangerPulse {
-            0%, 100% { box-shadow: 0 0 40px rgba(255, 51, 102, 0.4), inset 0 0 40px rgba(255, 51, 102, 0.1); }
-            50% { box-shadow: 0 0 80px rgba(255, 51, 102, 0.6), inset 0 0 60px rgba(255, 51, 102, 0.2); }
+            0%, 100% {
+                box-shadow:
+                    0 0 60px rgba(255, 51, 102, 0.5),
+                    0 0 120px rgba(255, 51, 102, 0.3),
+                    inset 0 0 60px rgba(255, 51, 102, 0.15);
+            }
+            50% {
+                box-shadow:
+                    0 0 100px rgba(255, 51, 102, 0.7),
+                    0 0 200px rgba(255, 51, 102, 0.4),
+                    inset 0 0 80px rgba(255, 51, 102, 0.25);
+            }
         }
 
         .ring-inner {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            bottom: 15px;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
             border-radius: 50%;
-            border: 1px solid #0d0d0d;
+            border: 1px solid rgba(255,255,255,0.05);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle, rgba(10,10,10,0.9) 0%, rgba(0,0,0,0.95) 100%);
+            background: radial-gradient(circle, rgba(5,5,5,0.95) 0%, rgba(0,0,0,0.98) 100%);
         }
 
         .status-icon {
-            font-size: 3rem;
+            font-size: 3.5rem;
             margin-bottom: 0.5rem;
             transition: all 0.3s;
         }
 
         .status-icon.awake {
             color: #00ff88;
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.9);
         }
 
         .status-icon.sleeping {
             color: #ff3366;
-            text-shadow: 0 0 20px rgba(255, 51, 102, 0.8);
-            animation: iconBlink 0.8s infinite;
+            text-shadow: 0 0 30px rgba(255, 51, 102, 0.9);
+            animation: iconBlink 0.6s infinite;
         }
 
         @keyframes iconBlink {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+            50% { opacity: 0.3; }
         }
 
         .status-text {
             font-family: 'Orbitron', monospace;
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
             letter-spacing: 0.15em;
             transition: all 0.3s;
@@ -126,12 +140,12 @@
 
         .status-text.awake {
             color: #00ff88;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
         }
 
         .status-text.sleeping {
             color: #ff3366;
-            text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+            text-shadow: 0 0 20px rgba(255, 51, 102, 0.6);
         }
 
         .status-text.waiting {
@@ -140,23 +154,22 @@
 
         .confidence-text {
             font-family: 'Orbitron', monospace;
-            font-size: 0.75rem;
-            color: #444;
+            font-size: 0.8rem;
+            color: #555;
             margin-top: 0.5rem;
             letter-spacing: 0.1em;
         }
 
-        /* Scanning lines effect */
         .scan-line {
             position: absolute;
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 60%;
+            width: 70%;
             height: 2px;
             background: linear-gradient(90deg, transparent, #00ff88, transparent);
             opacity: 0;
-            animation: scan 3s linear infinite;
+            animation: scan 2.5s linear infinite;
         }
 
         .scan-line.sleeping {
@@ -164,13 +177,12 @@
         }
 
         @keyframes scan {
-            0% { top: 20%; opacity: 0; }
-            10% { opacity: 0.6; }
-            90% { opacity: 0.6; }
-            100% { top: 80%; opacity: 0; }
+            0% { top: 15%; opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { top: 85%; opacity: 0; }
         }
 
-        /* Camera Section */
         .camera-section {
             position: relative;
             margin-bottom: 1.5rem;
@@ -178,14 +190,15 @@
 
         .camera-container {
             position: relative;
-            width: 180px;
-            height: 180px;
+            width: 160px;
+            height: 160px;
             margin: 0 auto;
             border-radius: 12px;
             overflow: hidden;
             display: none;
-            border: 1px solid #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.1);
             background: rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
         .camera-container.active {
@@ -200,13 +213,12 @@
 
         .camera-label {
             font-family: 'Orbitron', monospace;
-            font-size: 0.6rem;
-            color: #333;
+            font-size: 0.55rem;
+            color: #444;
             letter-spacing: 0.2em;
             margin-top: 0.8rem;
         }
 
-        /* Start Button */
         .start-btn {
             font-family: 'Orbitron', monospace;
             background: transparent;
@@ -223,7 +235,7 @@
 
         .start-btn:hover {
             background: rgba(0, 255, 136, 0.1);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.4);
         }
 
         .start-btn:disabled {
@@ -236,7 +248,6 @@
             display: none;
         }
 
-        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -247,9 +258,9 @@
 
         .logo {
             font-family: 'Orbitron', monospace;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             letter-spacing: 0.3em;
-            color: #444;
+            color: #555;
         }
 
         .live-indicator {
@@ -265,11 +276,12 @@
         }
 
         .live-dot {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             background: #00ff88;
             border-radius: 50%;
             animation: livePulse 1.5s infinite;
+            box-shadow: 0 0 10px #00ff88;
         }
 
         .live-text {
@@ -280,18 +292,17 @@
         }
 
         @keyframes livePulse {
-            0%, 100% { opacity: 1; box-shadow: 0 0 5px #00ff88; }
-            50% { opacity: 0.5; box-shadow: none; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
         }
 
-        /* Alert Overlay */
         .alert-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle, transparent 30%, rgba(255, 51, 102, 0.15) 100%);
+            background: radial-gradient(circle, transparent 20%, rgba(255, 51, 102, 0.2) 100%);
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.3s;
@@ -300,42 +311,71 @@
 
         .alert-overlay.active {
             opacity: 1;
-            animation: alertFlash 1s infinite;
+            animation: alertFlash 0.8s infinite;
         }
 
         @keyframes alertFlash {
-            0%, 100% { opacity: 0.3; }
+            0%, 100% { opacity: 0.2; }
             50% { opacity: 1; }
         }
 
-        /* Corner decorations */
         .corner {
             position: fixed;
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
             border-color: #1a1a1a;
             border-style: solid;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
             z-index: 15;
         }
 
-        .corner.tl { top: 20px; left: 20px; border-width: 1px 0 0 1px; }
-        .corner.tr { top: 20px; right: 20px; border-width: 1px 1px 0 0; }
-        .corner.bl { bottom: 20px; left: 20px; border-width: 0 0 1px 1px; }
-        .corner.br { bottom: 20px; right: 20px; border-width: 0 1px 1px 0; }
+        .corner.tl { top: 20px; left: 20px; border-width: 2px 0 0 2px; }
+        .corner.tr { top: 20px; right: 20px; border-width: 2px 2px 0 0; }
+        .corner.bl { bottom: 20px; left: 20px; border-width: 0 0 2px 2px; }
+        .corner.br { bottom: 20px; right: 20px; border-width: 0 2px 2px 0; }
 
-        .corner.awake { border-color: rgba(0, 255, 136, 0.3); }
-        .corner.sleeping { border-color: rgba(255, 51, 102, 0.3); }
+        .corner.awake {
+            border-color: rgba(0, 255, 136, 0.5);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+        .corner.sleeping {
+            border-color: rgba(255, 51, 102, 0.5);
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.3);
+        }
+
+        .data-display {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 3rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.6rem;
+            color: #333;
+            letter-spacing: 0.1em;
+            z-index: 15;
+        }
+
+        .data-item {
+            text-align: center;
+        }
+
+        .data-value {
+            color: #555;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
     </style>
 </head>
 <body>
     <canvas id="particleCanvas"></canvas>
     <div class="alert-overlay" id="alertOverlay"></div>
 
-    <div class="corner tl" id="corner1"></div>
-    <div class="corner tr" id="corner2"></div>
-    <div class="corner bl" id="corner3"></div>
-    <div class="corner br" id="corner4"></div>
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
 
     <div class="app">
         <header class="header">
@@ -366,113 +406,229 @@
         <button class="start-btn" id="startBtn" onclick="init()">INICIAR MONITOREO</button>
     </div>
 
+    <div class="data-display">
+        <div class="data-item">
+            <div>FRAMES</div>
+            <div class="data-value" id="frameCount">0</div>
+        </div>
+        <div class="data-item">
+            <div>PRECISION</div>
+            <div class="data-value" id="precisionValue">--%</div>
+        </div>
+        <div class="data-item">
+            <div>LATENCIA</div>
+            <div class="data-value" id="latencyValue">--ms</div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
 
     <script type="text/javascript">
-        // ============== PARTICLE SYSTEM ==============
+        // ============== ADVANCED 3D PARTICLE SYSTEM ==============
         const particleCanvas = document.getElementById('particleCanvas');
         const pCtx = particleCanvas.getContext('2d');
+
         let particles = [];
-        let particleColor = { r: 100, g: 100, b: 100 };
-        let targetColor = { r: 100, g: 100, b: 100 };
+        let nebulaClouds = [];
+        let stars = [];
+        let particleColor = { r: 80, g: 80, b: 80 };
+        let targetColor = { r: 80, g: 80, b: 80 };
+        let glowColor = { r: 80, g: 80, b: 80 };
         let mouseX = 0, mouseY = 0;
         let currentState = 'idle';
+        let time = 0;
 
-        function resizeParticleCanvas() {
+        function resizeCanvas() {
             particleCanvas.width = window.innerWidth;
             particleCanvas.height = window.innerHeight;
         }
 
+        // Estrella de fondo
+        class Star {
+            constructor() {
+                this.x = Math.random() * particleCanvas.width;
+                this.y = Math.random() * particleCanvas.height;
+                this.size = Math.random() * 1.5;
+                this.twinkleSpeed = Math.random() * 0.02 + 0.01;
+                this.twinkleOffset = Math.random() * Math.PI * 2;
+            }
+
+            draw() {
+                const twinkle = Math.sin(time * this.twinkleSpeed + this.twinkleOffset) * 0.5 + 0.5;
+                const alpha = 0.2 + twinkle * 0.3;
+                pCtx.beginPath();
+                pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                pCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                pCtx.fill();
+            }
+        }
+
+        // Nube de nebulosa
+        class NebulaCloud {
+            constructor() {
+                this.x = particleCanvas.width / 2 + (Math.random() - 0.5) * 400;
+                this.y = particleCanvas.height / 2 + (Math.random() - 0.5) * 400;
+                this.radius = 100 + Math.random() * 200;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.001;
+                this.pulseOffset = Math.random() * Math.PI * 2;
+            }
+
+            draw() {
+                const pulse = Math.sin(time * 0.01 + this.pulseOffset) * 0.3 + 0.7;
+                const gradient = pCtx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, this.radius * pulse
+                );
+
+                gradient.addColorStop(0, `rgba(${glowColor.r}, ${glowColor.g}, ${glowColor.b}, 0.03)`);
+                gradient.addColorStop(0.5, `rgba(${glowColor.r}, ${glowColor.g}, ${glowColor.b}, 0.015)`);
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+                pCtx.fillStyle = gradient;
+                pCtx.beginPath();
+                pCtx.arc(this.x, this.y, this.radius * pulse, 0, Math.PI * 2);
+                pCtx.fill();
+
+                this.rotation += this.rotationSpeed;
+            }
+        }
+
+        // Partícula principal
         class Particle {
             constructor() {
                 this.reset();
             }
 
             reset() {
-                // Posición en esfera
                 const angle = Math.random() * Math.PI * 2;
-                const radius = 150 + Math.random() * 200;
-                this.x = particleCanvas.width / 2 + Math.cos(angle) * radius;
-                this.y = particleCanvas.height / 2 + Math.sin(angle) * radius;
-                this.z = Math.random() * 200 - 100;
+                const angleY = Math.random() * Math.PI - Math.PI / 2;
+                const radius = 120 + Math.random() * 250;
 
-                this.originX = this.x;
-                this.originY = this.y;
-
-                this.size = Math.random() * 2 + 0.5;
-                this.speedX = (Math.random() - 0.5) * 0.5;
-                this.speedY = (Math.random() - 0.5) * 0.5;
-                this.speedZ = (Math.random() - 0.5) * 0.3;
-
-                // Rotación orbital
                 this.angle = angle;
-                this.orbitSpeed = (Math.random() - 0.5) * 0.002;
-                this.orbitRadius = radius;
+                this.angleY = angleY;
+                this.radius = radius;
+                this.orbitSpeed = (Math.random() - 0.5) * 0.003;
+                this.orbitSpeedY = (Math.random() - 0.5) * 0.001;
 
-                this.life = 1;
-                this.decay = Math.random() * 0.003 + 0.001;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.baseSize = this.size;
+
+                // Trail
+                this.trail = [];
+                this.maxTrail = Math.floor(Math.random() * 8) + 3;
+
+                this.brightness = Math.random() * 0.5 + 0.5;
+                this.pulseOffset = Math.random() * Math.PI * 2;
             }
 
             update() {
-                // Rotación orbital
-                this.angle += this.orbitSpeed;
+                // Guardar posición para trail
+                if (this.trail.length > this.maxTrail) {
+                    this.trail.shift();
+                }
+                this.trail.push({ x: this.x, y: this.y, size: this.displaySize });
 
-                // Movimiento base
+                // Rotación orbital 3D
+                this.angle += this.orbitSpeed;
+                this.angleY += this.orbitSpeedY;
+
                 const centerX = particleCanvas.width / 2;
                 const centerY = particleCanvas.height / 2;
 
-                this.x = centerX + Math.cos(this.angle) * this.orbitRadius + this.speedX * 10;
-                this.y = centerY + Math.sin(this.angle) * this.orbitRadius + this.speedY * 10;
-                this.z += this.speedZ;
+                // Calcular posición 3D
+                const x3d = Math.cos(this.angle) * this.radius;
+                const y3d = Math.sin(this.angleY) * this.radius * 0.3;
+                const z3d = Math.sin(this.angle) * this.radius;
 
-                // Efecto de profundidad
-                const scale = (200 + this.z) / 400;
-                this.displaySize = this.size * scale;
+                // Proyección con perspectiva
+                const perspective = 600;
+                const scale = perspective / (perspective + z3d);
+
+                this.x = centerX + x3d * scale;
+                this.y = centerY + y3d * scale + Math.cos(this.angle) * this.radius * 0.3 * scale;
+                this.z = z3d;
+
+                // Tamaño basado en profundidad
+                const pulse = Math.sin(time * 0.02 + this.pulseOffset) * 0.3 + 1;
+                this.displaySize = this.baseSize * scale * pulse;
 
                 // Interacción con mouse
                 const dx = mouseX - this.x;
                 const dy = mouseY - this.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-
-                if (dist < 100) {
-                    const force = (100 - dist) / 100;
-                    this.x -= dx * force * 0.02;
-                    this.y -= dy * force * 0.02;
+                if (dist < 150) {
+                    const force = (150 - dist) / 150;
+                    this.x -= dx * force * 0.03;
+                    this.y -= dy * force * 0.03;
                 }
 
-                // Estado sleeping: partículas más caóticas
+                // Comportamiento según estado
                 if (currentState === 'sleeping') {
-                    this.orbitSpeed = this.orbitSpeed > 0 ?
-                        Math.min(this.orbitSpeed + 0.0001, 0.01) :
-                        Math.max(this.orbitSpeed - 0.0001, -0.01);
-                    this.speedX += (Math.random() - 0.5) * 0.1;
-                    this.speedY += (Math.random() - 0.5) * 0.1;
+                    this.orbitSpeed += (Math.random() - 0.5) * 0.0005;
+                    this.orbitSpeed = Math.max(-0.015, Math.min(0.015, this.orbitSpeed));
                 } else if (currentState === 'awake') {
-                    // Más calmado cuando despierto
-                    this.speedX *= 0.98;
-                    this.speedY *= 0.98;
-                }
-
-                // Reset si sale de pantalla
-                if (this.z > 100 || this.z < -100) {
-                    this.speedZ *= -1;
+                    this.orbitSpeed *= 0.995;
                 }
             }
 
             draw() {
-                const alpha = ((200 + this.z) / 400) * 0.8;
+                // Dibujar trail
+                for (let i = 0; i < this.trail.length; i++) {
+                    const t = this.trail[i];
+                    const alpha = (i / this.trail.length) * 0.3 * this.brightness;
+                    const size = t.size * (i / this.trail.length);
+
+                    pCtx.beginPath();
+                    pCtx.arc(t.x, t.y, Math.max(0.1, size), 0, Math.PI * 2);
+                    pCtx.fillStyle = `rgba(${Math.floor(particleColor.r)}, ${Math.floor(particleColor.g)}, ${Math.floor(particleColor.b)}, ${alpha})`;
+                    pCtx.fill();
+                }
+
+                // Dibujar partícula
+                const depthAlpha = ((600 + this.z) / 1200) * this.brightness;
+
+                // Glow
+                const glowSize = this.displaySize * 3;
+                const gradient = pCtx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, glowSize
+                );
+                gradient.addColorStop(0, `rgba(${Math.floor(particleColor.r)}, ${Math.floor(particleColor.g)}, ${Math.floor(particleColor.b)}, ${depthAlpha * 0.5})`);
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+                pCtx.beginPath();
+                pCtx.arc(this.x, this.y, glowSize, 0, Math.PI * 2);
+                pCtx.fillStyle = gradient;
+                pCtx.fill();
+
+                // Core
                 pCtx.beginPath();
                 pCtx.arc(this.x, this.y, Math.max(0.1, this.displaySize), 0, Math.PI * 2);
-                pCtx.fillStyle = `rgba(${Math.floor(particleColor.r)}, ${Math.floor(particleColor.g)}, ${Math.floor(particleColor.b)}, ${alpha})`;
+                pCtx.fillStyle = `rgba(${Math.floor(particleColor.r + 50)}, ${Math.floor(particleColor.g + 50)}, ${Math.floor(particleColor.b + 50)}, ${depthAlpha})`;
                 pCtx.fill();
             }
         }
 
         function initParticles() {
-            resizeParticleCanvas();
+            resizeCanvas();
+
+            // Estrellas de fondo
+            stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push(new Star());
+            }
+
+            // Nubes de nebulosa
+            nebulaClouds = [];
+            for (let i = 0; i < 5; i++) {
+                nebulaClouds.push(new NebulaCloud());
+            }
+
+            // Partículas principales
             particles = [];
-            for (let i = 0; i < 800; i++) {
+            for (let i = 0; i < 500; i++) {
                 particles.push(new Particle());
             }
         }
@@ -481,54 +637,72 @@
             particleColor.r += (targetColor.r - particleColor.r) * 0.02;
             particleColor.g += (targetColor.g - particleColor.g) * 0.02;
             particleColor.b += (targetColor.b - particleColor.b) * 0.02;
+
+            glowColor.r += (targetColor.r - glowColor.r) * 0.01;
+            glowColor.g += (targetColor.g - glowColor.g) * 0.01;
+            glowColor.b += (targetColor.b - glowColor.b) * 0.01;
         }
 
-        function animateParticles() {
-            pCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-            pCtx.fillRect(0, 0, particleCanvas.width, particleCanvas.height);
-
-            lerpColor();
-
-            // Dibujar conexiones
+        function drawConnections() {
+            const maxDist = 60;
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x;
                     const dy = particles[i].y - particles[j].y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    if (dist < 50) {
-                        const alpha = (1 - dist / 50) * 0.15;
+                    if (dist < maxDist) {
+                        const alpha = (1 - dist / maxDist) * 0.15;
                         pCtx.beginPath();
                         pCtx.moveTo(particles[i].x, particles[i].y);
                         pCtx.lineTo(particles[j].x, particles[j].y);
                         pCtx.strokeStyle = `rgba(${Math.floor(particleColor.r)}, ${Math.floor(particleColor.g)}, ${Math.floor(particleColor.b)}, ${alpha})`;
+                        pCtx.lineWidth = 0.5;
                         pCtx.stroke();
                     }
                 }
             }
+        }
 
+        function animate() {
+            time++;
+
+            // Fondo con fade
+            pCtx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            pCtx.fillRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+            lerpColor();
+
+            // Dibujar estrellas
+            stars.forEach(s => s.draw());
+
+            // Dibujar nebulosas
+            nebulaClouds.forEach(n => n.draw());
+
+            // Dibujar conexiones
+            drawConnections();
+
+            // Actualizar y dibujar partículas
             particles.forEach(p => {
                 p.update();
                 p.draw();
             });
 
-            requestAnimationFrame(animateParticles);
+            requestAnimationFrame(animate);
         }
 
-        // Mouse tracking
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
         });
 
         window.addEventListener('resize', () => {
-            resizeParticleCanvas();
+            resizeCanvas();
             initParticles();
         });
 
-        // Start particle system
         initParticles();
-        animateParticles();
+        animate();
 
         // ============== POSTURE DETECTION ==============
         const URL = "https://teachablemachine.withgoogle.com/models/tlpoKJm_L/";
@@ -536,8 +710,9 @@
         let lastState = null;
         let audioContext = null;
         let sleepAlertInterval = null;
+        let frameCount = 0;
+        let lastFrameTime = performance.now();
 
-        // Síntesis de voz
         function speak(text) {
             if ('speechSynthesis' in window) {
                 speechSynthesis.cancel();
@@ -558,7 +733,6 @@
             speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
         }
 
-        // Solo alerta de sonido para dormido
         function playSleepingAlert() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -581,8 +755,7 @@
         }
 
         function setCorners(state) {
-            const corners = document.querySelectorAll('.corner');
-            corners.forEach(c => {
+            document.querySelectorAll('.corner').forEach(c => {
                 c.classList.remove('awake', 'sleeping');
                 if (state) c.classList.add(state);
             });
@@ -595,7 +768,7 @@
             } else if (state === 'sleeping') {
                 targetColor = { r: 255, g: 51, b: 102 };
             } else {
-                targetColor = { r: 100, g: 100, b: 100 };
+                targetColor = { r: 80, g: 80, b: 80 };
             }
         }
 
@@ -605,19 +778,13 @@
             startBtn.textContent = 'CARGANDO...';
 
             try {
-                const modelURL = URL + "model.json";
-                const metadataURL = URL + "metadata.json";
-
-                model = await tmPose.load(modelURL, metadataURL);
+                model = await tmPose.load(URL + "model.json", URL + "metadata.json");
                 maxPredictions = model.getTotalClasses();
 
-                const size = 180;
-                const flip = true;
-                webcam = new tmPose.Webcam(size, size, flip);
+                const size = 160;
+                webcam = new tmPose.Webcam(size, size, true);
                 await webcam.setup();
                 await webcam.play();
-
-                window.requestAnimationFrame(loop);
 
                 const canvas = document.getElementById("canvas");
                 canvas.width = size;
@@ -629,6 +796,8 @@
                 document.getElementById('cameraLabel').textContent = 'FEED EN VIVO';
                 startBtn.classList.add('hidden');
 
+                loop();
+
             } catch (error) {
                 startBtn.disabled = false;
                 startBtn.textContent = 'ERROR - REINTENTAR';
@@ -636,10 +805,19 @@
             }
         }
 
-        async function loop(timestamp) {
+        async function loop() {
             webcam.update();
             await predict();
-            window.requestAnimationFrame(loop);
+
+            frameCount++;
+            document.getElementById('frameCount').textContent = frameCount;
+
+            const now = performance.now();
+            const latency = Math.round(now - lastFrameTime);
+            lastFrameTime = now;
+            document.getElementById('latencyValue').textContent = latency + 'ms';
+
+            requestAnimationFrame(loop);
         }
 
         async function predict() {
@@ -663,7 +841,9 @@
             const scanLine = document.getElementById('scanLine');
             const alertOverlay = document.getElementById('alertOverlay');
 
-            confidenceText.textContent = Math.round(maxProb * 100) + '%';
+            const confidence = Math.round(maxProb * 100);
+            confidenceText.textContent = confidence + '%';
+            document.getElementById('precisionValue').textContent = confidence + '%';
 
             const isAwake = detectedClass.includes('despierto') ||
                            detectedClass.includes('awake') ||
@@ -731,9 +911,8 @@
             if (webcam.canvas) {
                 ctx.drawImage(webcam.canvas, 0, 0);
                 if (pose) {
-                    const minPartConfidence = 0.5;
-                    tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
-                    tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
+                    tmPose.drawKeypoints(pose.keypoints, 0.5, ctx);
+                    tmPose.drawSkeleton(pose.keypoints, 0.5, ctx);
                 }
             }
         }
