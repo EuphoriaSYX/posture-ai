@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostureAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: #000000;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 600px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        /* Main Status Circle */
+        .status-ring {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 2rem;
+        }
+
+        .ring-outer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #1a1a1a;
+            transition: all 0.5s ease;
+        }
+
+        .ring-outer.awake {
+            border-color: #00ff88;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.3), inset 0 0 40px rgba(0, 255, 136, 0.1);
+        }
+
+        .ring-outer.sleeping {
+            border-color: #ff3366;
+            box-shadow: 0 0 40px rgba(255, 51, 102, 0.4), inset 0 0 40px rgba(255, 51, 102, 0.1);
+            animation: dangerPulse 1.5s infinite;
+        }
+
+        @keyframes dangerPulse {
+            0%, 100% { box-shadow: 0 0 40px rgba(255, 51, 102, 0.4), inset 0 0 40px rgba(255, 51, 102, 0.1); }
+            50% { box-shadow: 0 0 80px rgba(255, 51, 102, 0.6), inset 0 0 60px rgba(255, 51, 102, 0.2); }
+        }
+
+        .ring-inner {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border-radius: 50%;
+            border: 1px solid #0d0d0d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, #0a0a0a 0%, #000000 100%);
+        }
+
+        .status-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .status-icon.awake {
+            color: #00ff88;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+        }
+
+        .status-icon.sleeping {
+            color: #ff3366;
+            text-shadow: 0 0 20px rgba(255, 51, 102, 0.8);
+            animation: iconBlink 0.8s infinite;
+        }
+
+        @keyframes iconBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .status-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            transition: all 0.3s;
+        }
+
+        .status-text.awake {
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .status-text.sleeping {
+            color: #ff3366;
+            text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+        }
+
+        .status-text.waiting {
+            color: #333;
+        }
+
+        .confidence-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.75rem;
+            color: #444;
+            margin-top: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        /* Scanning lines effect */
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            opacity: 0;
+            animation: scan 3s linear infinite;
+        }
+
+        .scan-line.sleeping {
+            background: linear-gradient(90deg, transparent, #ff3366, transparent);
+        }
+
+        @keyframes scan {
+            0% { top: 20%; opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { top: 80%; opacity: 0; }
+        }
+
+        /* Camera Section */
+        .camera-section {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+            border: 1px solid #1a1a1a;
+        }
+
+        .camera-container.active {
+            display: block;
+        }
+
+        #canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-label {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.6rem;
+            color: #333;
+            letter-spacing: 0.2em;
+            margin-top: 0.8rem;
+        }
+
+        /* Start Button */
+        .start-btn {
+            font-family: 'Orbitron', monospace;
+            background: transparent;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            padding: 1rem 2.5rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .start-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .start-btn:disabled {
+            color: #333;
+            border-color: #333;
+            cursor: not-allowed;
+        }
+
+        .start-btn.hidden {
+            display: none;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            color: #333;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .live-indicator.active {
+            opacity: 1;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: livePulse 1.5s infinite;
+        }
+
+        .live-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.6rem;
+            color: #00ff88;
+            letter-spacing: 0.2em;
+        }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 5px #00ff88; }
+            50% { opacity: 0.5; box-shadow: none; }
+        }
+
+        /* Alert Overlay */
+        .alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle, transparent 30%, rgba(255, 51, 102, 0.1) 100%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .alert-overlay.active {
+            opacity: 1;
+            animation: alertFlash 1s infinite;
+        }
+
+        @keyframes alertFlash {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Corner decorations */
+        .corner {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border-color: #1a1a1a;
+            border-style: solid;
+            transition: border-color 0.3s;
+        }
+
+        .corner.tl { top: 20px; left: 20px; border-width: 1px 0 0 1px; }
+        .corner.tr { top: 20px; right: 20px; border-width: 1px 1px 0 0; }
+        .corner.bl { bottom: 20px; left: 20px; border-width: 0 0 1px 1px; }
+        .corner.br { bottom: 20px; right: 20px; border-width: 0 1px 1px 0; }
+
+        .corner.awake { border-color: rgba(0, 255, 136, 0.3); }
+        .corner.sleeping { border-color: rgba(255, 51, 102, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="alert-overlay" id="alertOverlay"></div>
+
+    <div class="corner tl" id="corner1"></div>
+    <div class="corner tr" id="corner2"></div>
+    <div class="corner bl" id="corner3"></div>
+    <div class="corner br" id="corner4"></div>
+
+    <div class="app">
+        <header class="header">
+            <div class="logo">POSTURE.AI</div>
+            <div class="live-indicator" id="liveIndicator">
+                <span class="live-dot"></span>
+                <span class="live-text">LIVE</span>
+            </div>
+        </header>
+
+        <div class="status-ring">
+            <div class="ring-outer" id="ringOuter"></div>
+            <div class="ring-inner">
+                <div class="scan-line" id="scanLine"></div>
+                <div class="status-icon" id="statusIcon">⏸</div>
+                <div class="status-text waiting" id="statusText">STANDBY</div>
+                <div class="confidence-text" id="confidenceText">---%</div>
+            </div>
+        </div>
+
+        <div class="camera-section">
+            <div class="camera-container" id="cameraContainer">
+                <canvas id="canvas"></canvas>
+            </div>
+            <div class="camera-label" id="cameraLabel"></div>
+        </div>
+
+        <button class="start-btn" id="startBtn" onclick="init()">INICIAR MONITOREO</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
+
+    <script type="text/javascript">
+        const URL = "https://teachablemachine.withgoogle.com/models/tlpoKJm_L/";
+        let model, webcam, ctx, maxPredictions;
+        let lastState = null;
+        let audioContext = null;
+        let sleepAlertInterval = null;
+
+        // Síntesis de voz
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                // Cancelar cualquier voz anterior
+                speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES';
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+
+                // Buscar voz en español
+                const voices = speechSynthesis.getVoices();
+                const spanishVoice = voices.find(v => v.lang.includes('es'));
+                if (spanishVoice) {
+                    utterance.voice = spanishVoice;
+                }
+
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Cargar voces
+        if ('speechSynthesis' in window) {
+            speechSynthesis.getVoices();
+            speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+        }
+
+        function playAlertSound() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = 880;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
+        function playSleepingAlert() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    oscillator.frequency.value = 600;
+                    oscillator.type = 'square';
+                    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.12);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.12);
+                }, i * 150);
+            }
+        }
+
+        function setCorners(state) {
+            const corners = document.querySelectorAll('.corner');
+            corners.forEach(c => {
+                c.classList.remove('awake', 'sleeping');
+                if (state) c.classList.add(state);
+            });
+        }
+
+        async function init() {
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = true;
+            startBtn.textContent = 'CARGANDO...';
+
+            try {
+                const modelURL = URL + "model.json";
+                const metadataURL = URL + "metadata.json";
+
+                model = await tmPose.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                const size = 200;
+                const flip = true;
+                webcam = new tmPose.Webcam(size, size, flip);
+                await webcam.setup();
+                await webcam.play();
+
+                window.requestAnimationFrame(loop);
+
+                const canvas = document.getElementById("canvas");
+                canvas.width = size;
+                canvas.height = size;
+                ctx = canvas.getContext("2d");
+
+                document.getElementById('cameraContainer').classList.add('active');
+                document.getElementById('liveIndicator').classList.add('active');
+                document.getElementById('cameraLabel').textContent = 'FEED EN VIVO';
+                startBtn.classList.add('hidden');
+
+            } catch (error) {
+                startBtn.disabled = false;
+                startBtn.textContent = 'ERROR - REINTENTAR';
+                console.error(error);
+            }
+        }
+
+        async function loop(timestamp) {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
+            const prediction = await model.predict(posenetOutput);
+
+            let maxProb = 0;
+            let detectedClass = '';
+
+            for (let i = 0; i < maxPredictions; i++) {
+                if (prediction[i].probability > maxProb) {
+                    maxProb = prediction[i].probability;
+                    detectedClass = prediction[i].className.toLowerCase();
+                }
+            }
+
+            const statusIcon = document.getElementById('statusIcon');
+            const statusText = document.getElementById('statusText');
+            const confidenceText = document.getElementById('confidenceText');
+            const ringOuter = document.getElementById('ringOuter');
+            const scanLine = document.getElementById('scanLine');
+            const alertOverlay = document.getElementById('alertOverlay');
+
+            confidenceText.textContent = Math.round(maxProb * 100) + '%';
+
+            const isAwake = detectedClass.includes('despierto') ||
+                           detectedClass.includes('awake') ||
+                           detectedClass.includes('activo');
+
+            const isSleeping = detectedClass.includes('dormido') ||
+                              detectedClass.includes('sleep') ||
+                              detectedClass.includes('durmiendo');
+
+            if (isAwake && maxProb > 0.7) {
+                statusIcon.textContent = '◉';
+                statusIcon.className = 'status-icon awake';
+                statusText.textContent = 'DESPIERTO';
+                statusText.className = 'status-text awake';
+                ringOuter.className = 'ring-outer awake';
+                scanLine.className = 'scan-line';
+                alertOverlay.classList.remove('active');
+                setCorners('awake');
+
+                if (lastState !== 'awake') {
+                    playAlertSound();
+                    speak('Estás despierto');
+                    lastState = 'awake';
+                    if (sleepAlertInterval) {
+                        clearInterval(sleepAlertInterval);
+                        sleepAlertInterval = null;
+                    }
+                }
+            } else if (isSleeping && maxProb > 0.7) {
+                statusIcon.textContent = '⚠';
+                statusIcon.className = 'status-icon sleeping';
+                statusText.textContent = 'DORMIDO';
+                statusText.className = 'status-text sleeping';
+                ringOuter.className = 'ring-outer sleeping';
+                scanLine.className = 'scan-line sleeping';
+                alertOverlay.classList.add('active');
+                setCorners('sleeping');
+
+                if (lastState !== 'sleeping') {
+                    playSleepingAlert();
+                    speak('Alerta. Estás dormido. Despierta.');
+                    lastState = 'sleeping';
+                    // Repetir alerta de voz cada 5 segundos si sigue dormido
+                    sleepAlertInterval = setInterval(() => {
+                        playSleepingAlert();
+                        speak('Despierta');
+                    }, 5000);
+                }
+            } else {
+                statusIcon.textContent = '◎';
+                statusIcon.className = 'status-icon';
+                statusText.textContent = 'DETECTANDO';
+                statusText.className = 'status-text waiting';
+                ringOuter.className = 'ring-outer';
+                scanLine.className = 'scan-line';
+                alertOverlay.classList.remove('active');
+                setCorners(null);
+            }
+
+            drawPose(pose);
+        }
+
+        function drawPose(pose) {
+            if (webcam.canvas) {
+                ctx.drawImage(webcam.canvas, 0, 0);
+                if (pose) {
+                    const minPartConfidence = 0.5;
+                    tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
+                    tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
